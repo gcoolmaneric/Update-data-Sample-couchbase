@@ -93,17 +93,21 @@ public class syncUser {
 		System.out.println("\tCouchbase - Update User Data");
 		System.out.println("--------------------------------------------------------------------------");
 
+
 		List<URI> uris = new LinkedList<URI>();
-		uris.add(URI.create("http://172.30.1.167:8091/pools"));
+		// Couchbase Server IP 
+		uris.add(URI.create("http://192.168.1.1:8091/pools"));
 
 		CouchbaseClient cb = null;
 		try {
 			
+			// Initial Couchbase client 
 			cb = new CouchbaseClient(uris, "default", "");
 			
 			System.out.println("--------------------------------------------------------------------------");
 			View view = cb.getView("User", "UserData");
 			
+			// Set up query page 
 			Query query = new Query();
 			int docsPerPage = 10000;
 			int userCount = 0;
@@ -112,11 +116,12 @@ public class syncUser {
 			int pageCount = 0;
 			
 			Runtime r = Runtime.getRuntime() ;
-
+			
+			// Get User Data 
 			while(paginatedQuery.hasNext()) 
 			{
 				System.out.println("Total JVM Memory:" + r.totalMemory()) ;
-        			System.out.println("Before Memory = " + r.freeMemory()) ;
+        		System.out.println("Before Memory = " + r.freeMemory()) ;
 
 				pageCount++;
 				System.out.println(" -- Page "+ pageCount +" -- ");
@@ -124,9 +129,6 @@ public class syncUser {
 				
 				for (ViewRow row : response) 
 				{
-					//System.out.println(row.getKey() + " getId : " + row.getId());
-					//System.out.println(row.getValue() + " getValue : " + row.getValue());
-					
 					if(row.getValue().length() > 0 )
 					{
 						// 1. Serialize array from json data 
@@ -137,16 +139,8 @@ public class syncUser {
 						String userId = originId.substring(originId.indexOf("user")+5, originId.length());
 						
 						String name = userData[0].name;
-						//System.out.println("userId:"+ userId +" name: " + name );
-						
-						//if( name.length() > 0 && userId.equals("4137347"))
-						
 						if( name.length() > 0)
 						{
-							//System.out.println(">>>>> Start update userId: "+  userId );		
-							//System.out.println("###### Before soundStatus: "+  userData[0].soundStatus );
-							//System.out.println("###### Before others: "+  userData[0].others );
-							
 							// 2. Update user data 
 							userData[0].userId = userId;
 							userData[0].superUser = 0;
@@ -160,26 +154,21 @@ public class syncUser {
 							sound.put("se", 50);
 							sound.put("volumn", 100);
 							userData[0].soundStatus = (Object)sound;
-							//System.out.println("###### After soundStatus: "+  userData[0].soundStatus );
-							
+						
 							// update others 
 							int[] comments = {1};
 							LinkedTreeMap result=(LinkedTreeMap)userData[0].others;
 							result.put("comment", 1);
 							result.put("unlockedComments", comments);
 							userData[0].others = (Object)result;						
-							//System.out.println("###### After 2 others: "+  json.toJson(userData[0]) );
-	
+				
 							// 3. Save 
 							Map newData = new HashMap();
 							newData.put("udata", userData[0]);
 							cb.replace(row.getId(), json.toJson(newData));
 
 							userCount++;
-							
-							System.out.println(">>>>> userCount: "+ userCount +"  Update OK userId: "+  userId );
-							//System.exit(0);
-			
+	
 						}
 						
 						
@@ -190,7 +179,7 @@ public class syncUser {
 			 	
 				  
 				System.out.println("After Memory = " + r.freeMemory()) ;
-        		// Release memory 
+        		// Release VM memory to avoid running out of memory
 				r.gc() ;
         		System.out.println("After memory GC Memory = " + r.freeMemory()) ;
 
