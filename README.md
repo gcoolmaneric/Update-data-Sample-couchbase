@@ -1,6 +1,4 @@
-# couchbase
-
-How to update 20K json data in Couchbase ?
+# How to update 20K json data in Couchbase ?
 
 
 syncUser.java : source code 
