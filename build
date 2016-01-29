@@ -1,0 +1,3 @@
+rm -rf *.class
+javac -cp couchbase-client-1.4.4.jar:spymemcached-2.11.4.jar:gson-2.2.4.jar syncUser.java
+

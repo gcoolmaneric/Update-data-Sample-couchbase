@@ -1,0 +1,2 @@
+java -cp .:couchbase-client-1.4.4.jar:spymemcached-2.11.4.jar:jettison-1.1.jar:netty.3.5.5.Final.jar:commons-codec-1.5.jar:httpcore-4.3.jar:httpcore-nio-4.3.jar:gson-2.2.4.jar syncUser
+
